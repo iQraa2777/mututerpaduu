@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manajemen Mutu Terpadu - Upload PPT & Video</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: linear-gradient(135deg, #1e3c72, #04080d);
+        color: #fff;
+        text-align: center;
+        min-height: 100vh;
+      }
+      h1 {
+        font-size: 2.5em;
+        margin-bottom: 20px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      }
+      .input-section {
+        max-width: 600px;
+        margin: 0 auto 30px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+      input,
+      button {
+        padding: 10px;
+        margin: 5px;
+        border: none;
+        border-radius: 5px;
+        font-size: 1em;
+      }
+      button {
+        background: #4caf50;
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      button:hover {
+        background: #45a049;
+      }
+      .ppt-container {
+        max-width: 100%;
+        margin: 0 auto 20px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+      iframe {
+        width: 100%;
+        height: 600px;
+        border-radius: 8px;
+        border: none;
+      }
+      .fullscreen-btn {
+        margin-top: 10px;
+        background: #2196f3;
+      }
+      .fullscreen-btn:hover {
+        background: #0b7dda;
+      }
+      .video-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+      video {
+        width: 100%;
+        border-radius: 8px;
+      }
+      @media (max-width: 768px) {
+        iframe {
+          height: 400px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Manajemen Mutu Terpadu</h1>
+
+    <!-- Input Upload PPT -->
+    <div class="input-section">
+      <h2>Upload File PPT / PDF</h2>
+      <p>
+        Unggah file presentasi (.ppt, .pptx, atau .pdf) agar ditampilkan
+        langsung
+      </p>
+      <input type="file" id="ppt-file" accept=".ppt,.pptx,.pdf" />
+      <button onclick="uploadPPT()">Tampilkan PPT</button>
+    </div>
+
+    <!-- PPT Display -->
+    <div class="ppt-container">
+      <h2>Presentasi Anda</h2>
+      <iframe
+        id="ppt-frame"
+        src=""
+        allowfullscreen="true"
+        mozallowfullscreen="true"
+        webkitallowfullscreen="true"
+      ></iframe>
+      <button class="fullscreen-btn" onclick="toggleFullscreen()">
+        Fullscreen PPT
+      </button>
+    </div>
+
+    <!-- Video Section -->
+    <div class="video-container">
+      <h2>Upload Video Presentasi</h2>
+      <input type="file" id="video-file" accept="video/mp4" />
+      <button onclick="uploadVideo()">Tampilkan Video</button>
+      <video id="video-player" controls>
+        <source id="video-source" src="" type="video/mp4" />
+        Browser Anda tidak mendukung tag video.
+      </video>
+    </div>
+
+    <script>
+      // 🔹 Fungsi upload PPT/PDF
+      function uploadPPT() {
+        const fileInput = document.getElementById("ppt-file");
+        const file = fileInput.files[0];
+
+        if (!file) {
+          alert("Silakan pilih file PPT atau PDF terlebih dahulu!");
+          return;
+        }
+
+        const allowedTypes = [
+          "application/vnd.ms-powerpoint",
+          "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+          "application/pdf",
+        ];
+
+        if (!allowedTypes.includes(file.type)) {
+          alert("Hanya file .ppt, .pptx, atau .pdf yang diizinkan!");
+          return;
+        }
+
+        const fileURL = URL.createObjectURL(file);
+        const iframe = document.getElementById("ppt-frame");
+
+        if (file.type === "application/pdf") {
+          iframe.src = fileURL;
+        } else {
+          iframe.src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
+            fileURL
+          )}`;
+        }
+
+        localStorage.setItem("pptURL", fileURL);
+        localStorage.setItem("pptType", file.type);
+      }
+
+      // 🔹 Fungsi upload video langsung
+      function uploadVideo() {
+        const videoInput = document.getElementById("video-file");
+        const file = videoInput.files[0];
+
+        if (!file) {
+          alert("Silakan pilih file video MP4 terlebih dahulu!");
+          return;
+        }
+
+        if (file.type !== "video/mp4") {
+          alert("Hanya file video MP4 yang diizinkan!");
+          return;
+        }
+
+        const videoURL = URL.createObjectURL(file);
+        const video = document.getElementById("video-player");
+        const source = document.getElementById("video-source");
+
+        source.src = videoURL;
+        video.load();
+
+        // Simpan ke localStorage
+        localStorage.setItem("videoBlob", videoURL);
+      }
+
+      // 🔹 Fullscreen PPT
+      function toggleFullscreen() {
+        const iframe = document.getElementById("ppt-frame");
+        if (iframe.requestFullscreen) iframe.requestFullscreen();
+        else if (iframe.webkitRequestFullscreen)
+          iframe.webkitRequestFullscreen();
+        else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
+      }
+
+      // 🔹 Restore data setelah reload
+      window.addEventListener("load", () => {
+        const savedPPT = localStorage.getItem("pptURL");
+        const savedType = localStorage.getItem("pptType");
+        const savedVideo = localStorage.getItem("videoBlob");
+
+        const iframe = document.getElementById("ppt-frame");
+        const video = document.getElementById("video-player");
+        const source = document.getElementById("video-source");
+
+        // tampilkan PPT terakhir
+        if (savedPPT && savedType) {
+          if (savedType === "application/pdf") {
+            iframe.src = savedPPT;
+          } else {
+            iframe.src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
+              savedPPT
+            )}`;
+          }
+        }
+
+        // tampilkan video terakhir
+        if (savedVideo) {
+          source.src = savedVideo;
+          video.load();
+        }
+      });
+    </script>
+  </body>
+</html>
